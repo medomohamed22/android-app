@@ -1,0 +1,6 @@
+{
+  "name": "AiWay",
+  "description": "مساحة عمل برمجية ذكية بالذكاء الاصطناعي مع محرر كود وأدوات مستقلة",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
