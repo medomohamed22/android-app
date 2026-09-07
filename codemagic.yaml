@@ -13,12 +13,12 @@ workflows:
 
       - name: Create Gradle Wrapper
         script: |
-          gradle wrapper
+          gradle wrapper --gradle-version 9.3.1
 
       - name: Build APK
         script: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
     artifacts:
       - app/build/outputs/**/*.apk
