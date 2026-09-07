@@ -44,10 +44,10 @@ class OpenAiApiClient {
     var noStreamOptions = false
 
     suspend fun fetchModels(baseUrl: String, apiKey: String): List<String> = withContext(Dispatchers.IO) {
-        val cleanUrl = baseUrl.trimEnd('/') + "/models"
+        val cleanUrl = endpointUrl(baseUrl, "models")
         val reqBuilder = Request.Builder().url(cleanUrl).get()
         if (apiKey.isNotBlank()) {
-            reqBuilder.addHeader("Authorization", "Bearer ${apiKey.trim()}")
+            reqBuilder.header("Authorization", "Bearer ${normalizedApiKey(apiKey)}")
         }
 
         val res = executeWithRetry(reqBuilder.build(), retries = 1)
@@ -73,7 +73,7 @@ class OpenAiApiClient {
 
     suspend fun testConnection(baseUrl: String, apiKey: String, model: String): Long = withContext(Dispatchers.IO) {
         val start = System.currentTimeMillis()
-        val cleanUrl = baseUrl.trimEnd('/') + "/chat/completions"
+        val cleanUrl = endpointUrl(baseUrl, "chat/completions")
         val payload = JSONObject()
             .put("model", model)
             .put("messages", JSONArray().put(JSONObject().put("role", "user").put("content", "ping")))
@@ -84,7 +84,7 @@ class OpenAiApiClient {
             .url(cleanUrl)
             .post(payload.toString().toRequestBody(jsonMediaType))
         if (apiKey.isNotBlank()) {
-            reqBuilder.addHeader("Authorization", "Bearer ${apiKey.trim()}")
+            reqBuilder.header("Authorization", "Bearer ${normalizedApiKey(apiKey)}")
         }
 
         val res = executeWithRetry(reqBuilder.build(), retries = 0)
@@ -106,7 +106,7 @@ class OpenAiApiClient {
         stream: Boolean = true,
         onTextDelta: ((String) -> Unit)? = null
     ): CompletionResult = withContext(Dispatchers.IO) {
-        val cleanUrl = baseUrl.trimEnd('/') + "/chat/completions"
+        val cleanUrl = endpointUrl(baseUrl, "chat/completions")
         val bodyObj = JSONObject()
             .put("model", model)
             .put("messages", messages)
@@ -128,7 +128,7 @@ class OpenAiApiClient {
             .url(cleanUrl)
             .post(bodyObj.toString().toRequestBody(jsonMediaType))
         if (apiKey.isNotBlank()) {
-            reqBuilder.addHeader("Authorization", "Bearer ${apiKey.trim()}")
+            reqBuilder.header("Authorization", "Bearer ${normalizedApiKey(apiKey)}")
         }
 
         var res: Response
@@ -341,6 +341,26 @@ class OpenAiApiClient {
             }
         }
         list
+    }
+
+    private fun normalizedApiKey(apiKey: String): String {
+        return apiKey.trim()
+            .removePrefix("Bearer ")
+            .removePrefix("bearer ")
+            .trim()
+    }
+
+    private fun endpointUrl(baseUrl: String, endpoint: String): String {
+        var base = baseUrl.trim()
+        if (base.isBlank()) {
+            throw IllegalArgumentException("Base URL فارغ. مثال: https://api.openai.com/v1")
+        }
+        if (!base.startsWith("http://") && !base.startsWith("https://")) {
+            base = "https://$base"
+        }
+        base = base.trimEnd('/')
+        base = base.removeSuffix("/chat/completions").removeSuffix("/models").trimEnd('/')
+        return "$base/$endpoint"
     }
 
     private suspend fun executeWithRetry(request: Request, retries: Int): Response {

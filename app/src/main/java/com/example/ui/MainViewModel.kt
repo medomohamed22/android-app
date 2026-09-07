@@ -440,9 +440,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return list
     }
 
+    suspend fun fetchModelsList(baseUrl: String, apiKey: String): List<String> {
+        return apiClient.fetchModels(baseUrl, apiKey)
+    }
+
     suspend fun testApiConnection(): Long {
         val s = _settings.value
         return apiClient.testConnection(s.baseUrl, s.apiKey, s.model)
+    }
+
+    suspend fun testApiConnection(baseUrl: String, apiKey: String, model: String): Long {
+        return apiClient.testConnection(baseUrl, apiKey, model)
     }
 
     fun toggleWebSearch() {

@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
                     snackbarHost = {
                         SnackbarHost(hostState = snackbarHostState)
                     },
-                    contentWindowInsets = WindowInsets.statusBars
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0)
                 ) { innerPadding ->
                     Box(
                         modifier = Modifier
@@ -104,8 +104,12 @@ class MainActivity : ComponentActivity() {
                             currentSettings = settings,
                             onDismiss = { viewModel.closeSettings() },
                             onSave = { viewModel.saveSettings(it) },
-                            onFetchModels = { viewModel.fetchModelsList() },
-                            onTestConnection = { viewModel.testApiConnection() }
+                            onFetchModels = { baseUrl, apiKey ->
+                                viewModel.fetchModelsList(baseUrl, apiKey)
+                            },
+                            onTestConnection = { baseUrl, apiKey, model ->
+                                viewModel.testApiConnection(baseUrl, apiKey, model)
+                            }
                         )
                     }
 

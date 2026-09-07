@@ -52,8 +52,8 @@ fun SettingsDialog(
     currentSettings: AppSettings,
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit,
-    onFetchModels: suspend () -> List<String>,
-    onTestConnection: suspend () -> Long
+    onFetchModels: suspend (String, String) -> List<String>,
+    onTestConnection: suspend (String, String, String) -> Long
 ) {
     var baseUrl by remember { mutableStateOf(currentSettings.baseUrl) }
     var apiKey by remember { mutableStateOf(currentSettings.apiKey) }
@@ -83,8 +83,10 @@ fun SettingsDialog(
     ) {
         Surface(
             modifier = Modifier
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .imePadding()
                 .fillMaxWidth(0.95f)
-                .fillMaxHeight(0.9f),
+                .fillMaxHeight(0.90f),
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surface,
             border = CardDefaults.outlinedCardBorder()
@@ -174,7 +176,7 @@ fun SettingsDialog(
                                     isFetchingModels = true
                                     statusMessage = null
                                     try {
-                                        val list = onFetchModels()
+                                        val list = onFetchModels(baseUrl.trim(), apiKey.trim())
                                         modelsList = list
                                         statusMessage = Pair("تم جلب ${list.size} نموذجاً بنجاح", false)
                                     } catch (e: Exception) {
@@ -203,7 +205,7 @@ fun SettingsDialog(
                                     isTestingConnection = true
                                     statusMessage = null
                                     try {
-                                        val duration = onTestConnection()
+                                        val duration = onTestConnection(baseUrl.trim(), apiKey.trim(), model.trim())
                                         statusMessage = Pair("الاتصال ناجح ✓ استجاب خلال ${duration}ms", false)
                                     } catch (e: Exception) {
                                         statusMessage = Pair(e.message ?: "فشل الاتصال", true)
@@ -405,7 +407,9 @@ fun HistoryDrawerModal(
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.85f)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .imePadding()
+                .fillMaxWidth(0.88f)
                 .fillMaxHeight(),
             shape = RoundedCornerShape(topStart = 28.dp, bottomStart = 28.dp),
             color = MaterialTheme.colorScheme.surface
@@ -552,7 +556,9 @@ fun PreviewDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
+            modifier = Modifier
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .imePadding().fillMaxSize().padding(12.dp),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
             border = CardDefaults.outlinedCardBorder()

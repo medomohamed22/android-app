@@ -35,7 +35,7 @@ fun AiWayTopBar(
     var isModelMenuExpanded by remember { mutableStateOf(false) }
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().statusBarsPadding(),
         color = MaterialTheme.colorScheme.background,
         tonalElevation = 0.dp
     ) {
